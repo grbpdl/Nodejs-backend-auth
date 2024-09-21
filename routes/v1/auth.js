@@ -1,8 +1,21 @@
 const express = require('express');
-const { handleLogin,handleSignup,handleReset , verifyEmail,handleLogout,changePassword} = require('../../controllers/auth');
+const passport = require('passport'); 
+require('../../utils/passport');
+const { handleLogin,
+  handleSignup,
+  handleReset,
+  verifyEmail,
+  handleLogout,
+  changePassword,
+  successGoogleLogin,
+  failureGoogleLogin } = require('../../controllers/auth');
 
 const router = express.Router();
 
+
+
+router.use(passport.initialize()); 
+router.use(passport.session());
 
 router
   .route('/login')
@@ -22,4 +35,27 @@ router
 router
   .route('/user/verify/:id/:token')
   .get(verifyEmail)
+
+
+
+// Auth 
+router.get('/auth/google' , passport.authenticate('google', { scope: 
+	[ 'email', 'profile' ] 
+})); 
+
+// Auth Callback 
+router.get( '/auth/google/callback', 
+	passport.authenticate( 'google', { 
+		successRedirect: '/success', 
+		failureRedirect: '/failure'
+}));
+
+// Success 
+router.get('/success' , successGoogleLogin); 
+
+// failure 
+router.get('/failure' , failureGoogleLogin);
+
+
+
 module.exports = router;

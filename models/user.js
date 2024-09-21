@@ -8,11 +8,14 @@ const userSchema= new mongoose.Schema(
         },
         password:{
             type:String,
-            requierd:true
         },
         verified: {
             type: Boolean,
             default: false,
+          },
+        accounttype: {
+            type: String,
+            default: "local",
           },
     }
 )

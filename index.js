@@ -3,6 +3,7 @@ const express = require('express')
 require('dotenv').config()
 var cookieParser = require('cookie-parser')
 const cors=require('cors');
+const session = require('express-session');
 
 
 
@@ -27,6 +28,12 @@ const port = process.env.PORT
 const authRouter=require("./routes/v1/auth")
 
 // Middlewares required
+app.use(session({
+  resave: false,
+  saveUninitialized: true,
+  secret: process.env.SESSION_SECRET 
+}));
+
 app.use(express.json()) 
 app.use(express.urlencoded({ extended: true }))
 app.use(cors())

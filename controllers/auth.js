@@ -6,6 +6,7 @@ const sendEmail = require("../utils/mail");
 const { validateEmail, validatePassword } = require("../utils/formvalidator");
 require('dotenv').config();
 
+
 // Signup and register function
 async function handleSignup(req, res) {
   try {
@@ -193,11 +194,51 @@ async function changePassword(req, res) {
   }
 }
 
+//functions for google sign in
+const loadAuth = (req, res) => {
+  res.render('auth');
+}
+
+const successGoogleLogin =  async(req , res) => { 
+if(!req.user) 
+{
+  res.redirect('/failure'); 
+}
+
+const email=req.user.email
+let user=await User.findOne({email})
+if(!user)
+{
+  user = await User.create({ email,verified:true,accounttype:"google"});
+  
+}
+
+// Create a JWT token (1 hour)
+const token = jwt.sign({ exp: Math.floor(Date.now() / 1000) + (60 * 60), data: user._id }, process.env.TOKEN_SECRET);
+
+   // Set token in cookie
+   const options = {
+     expires: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
+     httpOnly: true
+   };
+
+   return res.status(200).cookie("token", token, options).json({ success: true, token, user });
+
+}
+
+const failureGoogleLogin = (req , res) => { 
+res.send("Error"); 
+}
+
+
 module.exports = {
   handleLogin,
   handleSignup,
   handleReset,
   verifyEmail,
   handleLogout,
-  changePassword
+  changePassword,
+  loadAuth,
+  successGoogleLogin,
+  failureGoogleLogin
 };
