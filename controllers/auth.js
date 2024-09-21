@@ -3,6 +3,7 @@ const Otp = require("../models/otp");
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken');
 const sendEmail = require("../utils/mail");
+const { validateEmail, validatePassword } = require("../utils/formvalidator");
 require('dotenv').config()
 
 
@@ -11,6 +12,11 @@ async function handleSignup(req, res) {
   try {
 
     const userData = await User.findOne({ email: req.body.email });
+    
+    if(validateEmail(userData.email)!=null)
+    {
+      return res.status(400).json({ msg: validateEmail(userData.email) });
+    }
     // check if user already exist
     if (userData && userData.verified == true)
       return res.status(400).json({ msg: 'User with given email already exist!' });
@@ -84,10 +90,21 @@ async function handleLogin(req, res) {
   try {
     const { email, password } = req.body;
 
+
     // Check if both email and password are provided
     if (!(email && password)) {
       return res.status(400).send("All fields are required");
     }
+
+    //validate email and password
+    if(validateEmail(email)!=null)
+      {
+        return res.status(400).json({ msg: validateEmail(email) });
+      }
+    if(validateEmail(password)!=null)
+      {
+        return res.status(400).json({ msg: validatePassword(password) });
+      }
 
     // Find the user by email
     const user = await User.findOne({ email });
@@ -164,6 +181,12 @@ async function handleReset(req, res) {
     if (!(email)) {
       return res.status(400).send("All fields are required");
     }
+
+    //email validation
+    if(validateEmail(email)!=null)
+      {
+        return res.status(400).json({ msg: validateEmail(email) });
+      }
 
     // Find the user by email
     const user = await User.findOne({ email });
