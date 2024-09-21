@@ -14,14 +14,14 @@ const app = express()
 
 //importing the required things
 const port = process.env.PORT
-const userRouter=require("./routes/v1/user")
+const authRouter=require("./routes/v1/auth")
 
 // Middlewares required
 app.use(express.json()) 
 app.use(express.urlencoded({ extended: true }))
 
 //all the routes of an app
-app.use("/user",userRouter);
+app.use("/",authRouter);
 
 
 //creating the server in the port
