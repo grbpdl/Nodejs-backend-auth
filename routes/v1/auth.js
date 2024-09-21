@@ -1,5 +1,5 @@
 const express = require('express');
-const { handleLogin,handleSignup,handleReset , verifyEmail,handleLogout} = require('../../controllers/auth');
+const { handleLogin,handleSignup,handleReset , verifyEmail,handleLogout,changePassword} = require('../../controllers/auth');
 
 const router = express.Router();
 
@@ -16,6 +16,9 @@ router
 router
   .route('/reset')
   .post(handleReset)
+router
+  .route('/change')
+  .post(changePassword)
 router
   .route('/user/verify/:id/:token')
   .get(verifyEmail)
