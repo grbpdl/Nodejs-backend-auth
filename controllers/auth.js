@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const sendEmail = require("../utils/mail");
 require('dotenv').config()
 
+
 //signup and register functinon
 async function handleSignup(req, res) {
   try {
@@ -80,12 +81,61 @@ async function verifyEmail(req, res) {
 //functin to handle login
 async function handleLogin(req, res) {
   try {
-    console.log("login")
+    const { email, password } = req.body;
+
+    // Check if both email and password are provided
+    if (!(email && password)) {
+      return res.status(400).send("All fields are required");
+    }
+
+    // Find the user by email
+    const user = await User.findOne({ email });
     
+    // If user is not found
+    if (!user) {
+      return res.status(400).json({msg:'user doesnot exist'});
+    }
+    if ((user.verified == false ))
+      return res.status(400).json({msg:'verify before login!'});
+  
+
+    // Compare the provided password with the hashed password in the database
+    const isPasswordMatch = await bcrypt.compare(password, user.password);
+    
+    // If the password does not match
+    if (!isPasswordMatch) {
+      return res.status(400).json({msg:'password doesnot match'});
+    }
+
+    // Create JWT token
+    const token = jwt.sign({
+      exp: Math.floor(Date.now() / 1000) + (60 * 60), // Token expires in 1 hour
+      data: user._id
+    }, process.env.TOKEN_SECRET);
+
+    // Assign token to user object, and exclude password from response
+    user.token = token;
+    user.password = undefined;
+
+    // Cookie options
+    const options = {
+      expires: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000), // 3 days
+      httpOnly: true // Cookie cannot be accessed via client-side scripts
+    };
+
+    // Send the response with token and user information
+    return res.status(200).cookie("token", token, options).json({
+      success: true,
+      token,
+      user
+    });
+
   } catch (error) {
-    console.log(error)
+    console.log(error);
+    return res.status(500).json({ msg: 'An internal server error occurred' });
   }
 }
+
 
 //function to handle reset password
 async function handleReset(req, res) {
