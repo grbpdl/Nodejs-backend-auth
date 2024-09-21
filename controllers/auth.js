@@ -138,16 +138,23 @@ async function handleLogin(req, res) {
 
 
 //function to handle reset password
+async function handleLogout(req, res) {
+ try {
+  res.cookie("token", null, {
+    expires: new Date(Date.now()),
+    httpOnly: true,
+  });
+
+  res.status(200).json({
+    success: true,
+    message: "Logged Out",
+  });
+ } catch (error) {
+  
+ }
+}
 async function handleReset(req, res) {
-  const body = req.body
-  console.log(body)
-  await User.create({
-    email: body.email,
-    password: body.password
-  })
-  res.status(201).json({
-    msg: "created user sucessfully"
-  })
+ 
 }
 
 
@@ -156,4 +163,5 @@ module.exports = {
   handleSignup,
   handleReset,
   verifyEmail,
+  handleLogout
 };
