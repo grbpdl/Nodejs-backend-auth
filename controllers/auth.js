@@ -10,7 +10,7 @@ require('dotenv').config();
 // Signup and register function
 async function handleSignup(req, res) {
   try {
-    const { email, password } = req.body;
+    const { email, password} = req.body;
 
     // Validate email and password
     const emailError = validateEmail(email);
