@@ -1,29 +1,49 @@
 const nodemailer = require('nodemailer');
-require('dotenv').config()
+const fs = require('fs');
+require('dotenv').config();
 
-
-const sendEmail = async (email,html) => {
+const sendEmail = async (email, html, pdfFilePath = null) => {
+  console.log(fs.existsSync(pdfFilePath))
   try {
     const transporter = nodemailer.createTransport({
       host: process.env.HOST,
-      //service: process.env.SERVICE,
       port: 465,
-      secure: true,
+      secure: true, // true for 465, false for other ports
       auth: {
         user: process.env.USER,
         pass: process.env.PASS,
       },
     });
 
-    await transporter.sendMail({
+    // Email options
+    let mailOptions = {
       from: 'noreply@gmail.com',
       to: email,
-      //subject: subject,
       html,
-    });
-    console.log('email sent sucessfully');
+    };
+
+    // If a PDF file path is provided, attach the file
+    if (pdfFilePath && fs.existsSync(pdfFilePath)) {
+      mailOptions.attachments = [
+        {
+          filename: 'document.pdf', // You can customize the attachment filename
+          path: pdfFilePath,        // Path to the PDF file
+          contentType: 'application/pdf',
+        },
+      ];
+    }
+
+    // Send email
+    await transporter.sendMail(mailOptions);
+    console.log('Email sent successfully');
+    if (pdfFilePath && fs.existsSync(pdfFilePath)) {
+      fs.unlink(pdfFilePath, (err) => {
+        if (err) throw err;
+        console.log(`PDF file ${pdfFilePath} deleted successfully`);
+      });
+    }
   } catch (error) {
-    console.log('email not sent');
+    console.log('Email not sent');
     console.log(error);
   }
 };

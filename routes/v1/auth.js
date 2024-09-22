@@ -8,7 +8,8 @@ const { handleLogin,
   handleLogout,
   changePassword,
   successGoogleLogin,
-  failureGoogleLogin } = require('../../controllers/auth');
+  failureGoogleLogin,
+  sendPdf } = require('../../controllers/auth');
 
 const router = express.Router();
 
@@ -56,6 +57,10 @@ router.get('/success' , successGoogleLogin);
 // failure 
 router.get('/failure' , failureGoogleLogin);
 
+//generate invoice
+router
+  .route('/pdf')
+  .post(sendPdf)
 
 
 module.exports = router;

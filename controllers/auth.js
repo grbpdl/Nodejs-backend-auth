@@ -4,6 +4,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const sendEmail = require("../utils/mail");
 const { validateEmail, validatePassword } = require("../utils/formvalidator");
+const { generateInvoice } = require("../utils/pdfgenerator");
 require('dotenv').config();
 
 
@@ -229,6 +230,21 @@ const token = jwt.sign({ exp: Math.floor(Date.now() / 1000) + (60 * 60), data: u
 const failureGoogleLogin = (req , res) => { 
 res.send("Error"); 
 }
+const sendPdf = (req , res) => { 
+  try {
+    const {email,product,price}=req.body;
+    if(!(email && product&& price))
+    {
+      return res.status(400).json({ msg: "All fields are required" });
+    }
+generateInvoice(email,product,price);
+res.status(200).json({ msg: "Pdf sent to email sucessfully" })
+  
+  } catch (error) {
+    console.log(error)
+    return res.status(400).json({ msg: "Error occured"+error.message });
+  }
+}
 
 
 module.exports = {
@@ -240,5 +256,6 @@ module.exports = {
   changePassword,
   loadAuth,
   successGoogleLogin,
-  failureGoogleLogin
+  failureGoogleLogin,
+  sendPdf
 };
